@@ -19,7 +19,7 @@ app.get('/api/customers', async (req, res) => {
 });
 
 
-// to get all restaurants
+// GET all restaurants
 app.get('/api/restaurants', async (req, res) => {
     try {
         const restaurants = await db.fetchRestaurants();
@@ -43,12 +43,35 @@ app.get('/api/reservations', async (req, res) => {
 
 // POST a reservation for a customer
 app.post('/api/customers/:id/reservations', async (req, res) => {
+    const customerId = req.params.id;
+    const { restaurant_id, date, party_count } = req.body;
 
+    try {
+        const reservationData = {
+            customer_id: customerId,
+            restaurant_id,
+            date,
+            party_count,
+        };
+
+        const reservation = await db.createReservation(reservationData);
+        res.status(201).json(reservation);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // DELETE a reservation
 app.delete('/api/customers/:customer_id_reservation/:id', async (req, res) => {
+    const customerId = req.params.customer_id;
+    const reservationId = req.params.id;
 
+    try {
+        await db.destroyReservation(reservationId);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // error handling
